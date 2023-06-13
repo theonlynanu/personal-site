@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Query
-from typing import Annotated
 from pydantic import BaseModel, validator, Required
 from random import choice
 from copy import deepcopy
