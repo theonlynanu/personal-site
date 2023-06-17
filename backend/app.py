@@ -1,12 +1,26 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, HTTPException, Depends, Header
 from typing import Annotated
 from pydantic import BaseModel, validator, Required
 from random import choice
 from copy import deepcopy
+from dotenv import load_dotenv
+from os import getenv
 
 app = FastAPI()
 
+load_dotenv()
 
+async def validate_api_key(X_API_KEY: Annotated[str|None, Header(convert_underscores=False)]):
+    """Pulls API Key from request header and compares it to environment variable"""
+    if X_API_KEY == getenv("API_KEY"):
+        return X_API_KEY
+    else:
+        raise HTTPException(status_code="HTTP_401_UNAUTHORIZED")
+
+#
+api_key_required = Annotated[str|None, Depends(validate_api_key)]
+
+ 
 class BoardState(BaseModel):
     state: list[str | None]
     
@@ -19,10 +33,10 @@ class BoardState(BaseModel):
             if value not in valid_values:
                 raise ValueError("Invalid value in board state")
         return state
-    
+
     
 @app.post("/api/ai-move/random")
-def get_random_move(board_state: BoardState = Required):
+def get_random_move(board_state: BoardState = Required, X_API_KEY: api_key_required = None):
     """OPPONENT MODEL - Random Move
     
     Must receive a BoardState object to parse through its .state attribute
@@ -37,8 +51,7 @@ def get_random_move(board_state: BoardState = Required):
 
         
 @app.post("/api/ai-move/minmax")
-def get_minmax_move(board_state: BoardState = Required):
-    # TODO
+def get_minmax_move(board_state: BoardState = Required, X_API_KEY: api_key_required = None):
     """OPPONENT MODEL - Minmax
     
     Must receive a BoardState object to parse through its .state attribute
