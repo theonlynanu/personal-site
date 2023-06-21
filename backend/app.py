@@ -68,8 +68,7 @@ def get_minmax_move(board_state: BoardState = Required, X_API_KEY: api_key_requi
     """
     board = board_state.state
     
-    return {"ai_move": minmax(board, -inf, inf),
-            "player":player(board)}
+    return {"ai_move": minmax(board, -inf, inf)[0]}
 
 
 def player(board: list[str | None]):
