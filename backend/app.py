@@ -1,12 +1,20 @@
 from fastapi import FastAPI, HTTPException, Depends, Header
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Annotated
 from pydantic import BaseModel, validator, Required
 from random import choice
 from copy import deepcopy
 from dotenv import load_dotenv
 from os import getenv
+from math import inf
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware, 
+    allow_origins=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=['*']
+    )
 
 load_dotenv()
 
@@ -47,7 +55,8 @@ def get_random_move(board_state: BoardState = Required, X_API_KEY: api_key_requi
     if not valid_moves:
         return {"ai_move": None}
     random_move = choice(valid_moves)
-    return {"ai_move": random_move}
+    return {"ai_move": random_move,
+            }
 
         
 @app.post("/api/ai-move/minmax")
@@ -59,7 +68,8 @@ def get_minmax_move(board_state: BoardState = Required, X_API_KEY: api_key_requi
     """
     board = board_state.state
     
-    return {"ai_move": minmax(board)}
+    return {"ai_move": minmax(board, -inf, inf),
+            "player":player(board)}
 
 
 def player(board: list[str | None]):
@@ -67,7 +77,7 @@ def player(board: list[str | None]):
     
     Assumes that X goes first for any given game
     """
-    if board.count("X") > board.count("O"):
+    if board.count("X") > board.count("O"): 
         return "O"
     return "X"
     
@@ -92,7 +102,7 @@ def available_actions(board: list[str | None]) -> list[int]:
     """Returns available move indices given a board state. 
     
     Agnostic to which player's turn it is, for use by opponent models to 
-    populate search pahts
+    populate search paths
     """
     options = []
     for i, x in enumerate(board):
@@ -140,49 +150,37 @@ def board_utility(board: list[str | None]):
         return 0
 
 
-def minmax(board: list[str | None]):
-    """Returns the optimal move value and index based on board input board
-    
-    This implements the minmax algorithm *without* alpha-beta pruning or depth-, 
-    limiting, using full depth-first search. X is assumed the maximizing player
-    """
-
-    def max_value(board):
-        value = -2
-        move = None
-        
-        for action in available_actions(board):
-            res = result_of_move(board, action)
-            if is_terminal(res):
-                return (board_utility(res), action)
-            
-            v = max(min_value(res)[0], value)
-            
-            if v >= value:
-                value = v
-                move = action
-        return (value, move)
-    
-    def min_value(board):
-        value = 2
-        move = None
-        
-        for action in available_actions(board):
-            res = result_of_move(board, action)
-            if is_terminal(res):
-                return (board_utility(res), action)
-            
-            v = min(max_value(res)[0], value)
-            
-            if v <= value:
-                value = v
-                move = action
-            return (value, move)
-        
+def minmax(board: list[str | None], alpha, beta):
+    """Returns the optimal move value and index based on board input board"""
     if is_terminal(board):
-        return None
+        return None, board_utility(board)
+    
+    moves = available_actions(board)
+    best_move = moves[0]
     
     if player(board) == "X":
-        return max_value(board)[1]
-    else:
-        return min_value(board)[1]
+        max_eval = -inf
+        for move in moves:
+            board_copy = result_of_move(board, move)
+            current_eval = minmax(board_copy, alpha, beta)[1]
+            if current_eval > max_eval:
+                max_eval = current_eval
+                best_move = move
+            alpha = max(alpha, current_eval)
+            if beta <= alpha:
+                break
+        return best_move, max_eval
+    
+    if player(board) == "O":
+        min_eval = inf
+        for move in moves:
+            board_copy = result_of_move(board, move)
+            current_eval = minmax(board_copy, alpha, beta)[1]
+            if current_eval < min_eval:
+                min_eval = current_eval
+                best_move = move
+            beta = min(beta, current_eval)
+            if beta <= alpha:
+                break
+        return best_move, min_eval
+
