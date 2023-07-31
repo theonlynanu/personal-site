@@ -8,7 +8,7 @@ The `backend/` directory includes the API for the tictactoe game. For those of y
 
 The answer's just as simple. I wanted to learn more about using cloud infrastructure and deploying containers. I could easily write the API in my NextJS project in Typescript and call it a day (hell, I still might), but the reason I decided to write my entire portfolio from scratch was so that I could learn without boundaries. I hope that comes across.
 
-The `website/` submodule includes a (hopefully) up-to-date copy of the site's source code. I wanted this repo to have a full picture of the project, including the API and commit history, without complicating the repo that my Vercel deployment is on. If you're unsure on the development of the actual preview branch, you can consult the [website repo](github.com/theonlynanu/website) - that should have the most recent version of the site's deployment, including the preview branch and its tests.
+The `website/` submodule includes a (hopefully) up-to-date copy of the site's source code. I wanted this repo to have a full picture of the project, including the API and commit history, without complicating the repo that my Vercel deployment is on. If you're unsure on the development of the actual preview branch, you can consult the [website repo](https://github.com/theonlynanu/website) - that should have the most recent version of the site's deployment, including the preview branch and its tests.
 
 Finally, you might notice that the git commits are, for lack of a better word, insane. Very *very* granular, with some interstitial commits that aren't quite functional or meaningful. The reason for this is threefold. 
 
