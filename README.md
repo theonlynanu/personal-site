@@ -1,4 +1,4 @@
-# [danyalahmed.dev](danyalahmed.dev)
+# [danyalahmed.dev](https://danyalahmed.dev)
 
 ## Thanks for visiting! 
 This repository is meant to be both a portfolio and a portfolio piece in and of itself.
